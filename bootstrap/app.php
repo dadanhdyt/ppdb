@@ -16,8 +16,15 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        $middleware->redirectGuestsTo(function(){
+            return route('peserta.login');
+        });
+        $middleware->redirectUsersTo(function(){
+            return route('peserta.index');
+        });
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+
     })->create();
