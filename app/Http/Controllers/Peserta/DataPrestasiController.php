@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Peserta;
 
 use App\Http\Controllers\Controller;
+use App\Models\DataPrestasi;
 use App\Services\PrestasiService;
 use App\Services\UploadFileService;
 use Illuminate\Http\Request;
@@ -57,17 +58,12 @@ class DataPrestasiController extends Controller
         $validated['pendaftaran_id'] = auth()->user()->pendaftaran->id;
 
         $this->prestasiService->tambah($validated);
-        return redirect()->route('peserta.data-prestasi.index');
+        return redirect()->route('peserta.data-prestasi.index')->withErrors([
+            'success' => "Data prestasi berhasil di tambahkan"
+        ]);
 
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -90,6 +86,9 @@ class DataPrestasiController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+    DataPrestasi::find($id)->delete();
+        return redirect()->back()->withErrors([
+            'success' => "Data berhasil di hapus"
+        ]);
     }
 }

@@ -20,7 +20,7 @@ Route::middleware('guest')->group(function () {
 });
 
 
-Route::prefix('peserta')->name('peserta.')->group(function () {
+Route::prefix('peserta')->name('peserta.')->middleware('auth')->group(function () {
    Route::get('/', DashboardController::class)->name('index');
    Route::get('/detail', DetailPesertaController::class)->name('detail');
    /**
@@ -41,5 +41,6 @@ Route::prefix('peserta')->name('peserta.')->group(function () {
    Route::controller(App\Http\Controllers\Peserta\DataPrestasiController::class)->group(function () {
       Route::get('/data-prestasi/tambah','create')->name('data-prestasi.tambah');
       Route::post('/data-prestasi/tambah','store')->name('data-prestasi.simpan');
+      Route::delete('/data-prestasi/{id}/delete','destroy')->name('data-prestasi.delete');
    });
 });

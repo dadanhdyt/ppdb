@@ -2,8 +2,11 @@
 import { ref } from "vue";
 
 import { Link } from "@inertiajs/vue3";
-const openDrawer = ref(false);
 
+let openDrawer = ref(false);
+if ( window.matchMedia('(min-width:720px)').matches ){
+     openDrawer.value = ref(true);
+}
 const menu = [
     {
         title: "MENU UTAMA",
