@@ -8,14 +8,18 @@ use App\Services\PrestasiService;
 use App\Services\UploadFileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
 class DataPrestasiController extends Controller
 {
     public function __construct(
         public readonly UploadFileService $uploadFileService,
         public readonly PrestasiService $prestasiService
-    ){}
+    ) {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -23,8 +27,9 @@ class DataPrestasiController extends Controller
     {
         $pendaftaran_id = Auth::user()->pendaftaran->id;
         $prestasi = $prestasiService->getByPendaftaranId($pendaftaran_id);
+
         return inertia('Peserta/DataPrestasi', [
-            'prestasi' => $prestasi
+            'prestasi' => $prestasi,
         ]);
     }
 
@@ -50,27 +55,17 @@ class DataPrestasiController extends Controller
             'file_sertifikat' => 'nullable|mimes:pdf',
         ]);
         $filename = null;
-        if($validated['file_sertifikat']){
-
-            $filename = $this->uploadFileService->uploadSertifikat($validated['file_sertifikat'],Str::slug($validated['nama']." sertifikat").Str::uuid());
+        if ($validated['file_sertifikat']) {
+            $filename = $this->uploadFileService->uploadSertifikat($validated['file_sertifikat'], Str::slug($validated['nama'] . ' sertifikat') . Str::uuid());
         }
         $validated['file_sertifikat'] = $filename;
         $validated['pendaftaran_id'] = auth()->user()->pendaftaran->id;
 
         $this->prestasiService->tambah($validated);
+
         return redirect()->route('peserta.data-prestasi.index')->withErrors([
-            'success' => "Data prestasi berhasil di tambahkan"
+            'success' => 'Data prestasi berhasil di tambahkan',
         ]);
-
-    }
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
@@ -78,7 +73,35 @@ class DataPrestasiController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $dataPrestasi = DataPrestasi::find($id);
+        if (!Gate::allows('update_data_prestasi', $dataPrestasi)) {
+            return abort(403);
+        }
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'tahun' => 'required|integer|min:1900|max:' . date('Y'),
+            'jenis_perlombaan' => 'required|string|max:255',
+            'lingkup' => 'required|string|max:255',
+            'perinkat' => 'required|string|max:255',
+            'file_sertifikat' => 'nullable|mimes:pdf',
+        ]);
+        $old_filename = $dataPrestasi->file_sertifikat ?? '';
+
+        if ($file = $request->file('file_sertifikat')) {
+            $filename = $this->uploadFileService->uploadSertifikat($file, Str::slug($validated['nama'] . ' sertifikat') . Str::uuid());
+            $validated['file_sertifikat'] = $filename;
+        }
+        if ($dataPrestasi->update($validated)) {
+            if ($request->file('file_sertifikat') && Storage::disk('public')->exists($old_filename)) {
+                Storage::disk('public')->delete($old_filename);
+            }
+            return redirect()->route('peserta.data-prestasi.index')->withErrors([
+                'success' => 'Data prestasi berhasil di update',
+            ]);
+        }
+        return redirect()->route('peserta.data-prestasi.index')->withErrors([
+            'success' => 'Data prestasi gagal di update',
+        ]);
     }
 
     /**
@@ -86,9 +109,10 @@ class DataPrestasiController extends Controller
      */
     public function destroy(string $id)
     {
-    DataPrestasi::find($id)->delete();
+        DataPrestasi::find($id)->delete();
+
         return redirect()->back()->withErrors([
-            'success' => "Data berhasil di hapus"
+            'success' => 'Data berhasil di hapus',
         ]);
     }
 }

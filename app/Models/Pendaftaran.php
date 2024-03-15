@@ -27,4 +27,7 @@ class Pendaftaran extends Model
     public function getJalur(){
         return "PRESTASI";
     }
+    public function dataPrestasi(){
+        return $this->hasMany(DataPrestasi::class);
+    }
 }

@@ -23,7 +23,7 @@ class SimpanDataPesertaRequest extends FormRequest
     {
         return [
             'nama_lengkap' => 'required|string',
-            'nisn' => 'required|string|regex:/^\d{10}$/',
+            'nisn' => 'required',
             'jenis_kelamin' => 'required|string|in:L,P',
             'tinggi_badan' => 'required|integer|min:0',
             'berat_badan' => 'required|integer|min:0',

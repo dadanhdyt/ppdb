@@ -42,5 +42,6 @@ Route::prefix('peserta')->name('peserta.')->middleware('auth')->group(function (
       Route::get('/data-prestasi/tambah','create')->name('data-prestasi.tambah');
       Route::post('/data-prestasi/tambah','store')->name('data-prestasi.simpan');
       Route::delete('/data-prestasi/{id}/delete','destroy')->name('data-prestasi.delete');
+      Route::patch('/data-prestasi/{id}/edit','update')->name('data-prestasi.update');
    });
 });
